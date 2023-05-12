@@ -342,7 +342,7 @@ export function getAttributes(tag) {
   // known boolean attributes
   // we can check for matching boolean properties, but not all browsers
   // and not all tags know about these attributes, so, we still want to check them manually
-  const knownBooleans = ',' + 'autoplay,controls,playsinline,loop,muted,default,defaultMuted' + ',';
+  const knownBooleans = ',' + 'autoplay,controls,playsinline,loop,muted,default,defaultMuted,download' + ',';
 
   if (tag && tag.attributes && tag.attributes.length > 0) {
     const attrs = tag.attributes;

@@ -15,6 +15,7 @@ import './seek-to-live.js';
 import './progress-control/progress-control.js';
 import './picture-in-picture-toggle.js';
 import './fullscreen-toggle.js';
+import './download-button.js';
 import './volume-panel.js';
 import './skip-buttons/skip-forward.js';
 import './skip-buttons/skip-backward.js';
@@ -56,30 +57,31 @@ class ControlBar extends Component {
  */
 ControlBar.prototype.options_ = {
   children: [
-    'playToggle',
-    'skipBackward',
-    'skipForward',
-    'volumePanel',
+    { name: 'playToggle', replay: false },
+    // 'skipBackward',
+    // 'skipForward',
     'currentTimeDisplay',
     'timeDivider',
     'durationDisplay',
     'progressControl',
-    'liveDisplay',
-    'seekToLive',
-    'remainingTimeDisplay',
-    'customControlSpacer',
+    // 'liveDisplay',
+    // 'seekToLive',
+    // 'remainingTimeDisplay',
+    // 'customControlSpacer',
     'playbackRateMenuButton',
-    'chaptersButton',
-    'descriptionsButton',
-    'subsCapsButton',
-    'audioTrackButton',
-    'fullscreenToggle'
+    { name: 'volumePanel', inline: false },
+    // 'chaptersButton',
+    // 'descriptionsButton',
+    // 'subsCapsButton',
+    // 'audioTrackButton',
+    'fullscreenToggle',
+    'downloadButton'
   ]
 };
 
 if ('exitPictureInPicture' in document) {
   ControlBar.prototype.options_.children.splice(
-    ControlBar.prototype.options_.children.length - 1,
+    ControlBar.prototype.options_.children.length - 2,
     0,
     'pictureInPictureToggle'
   );

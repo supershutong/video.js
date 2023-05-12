@@ -279,6 +279,8 @@ const DEFAULT_BREAKPOINTS = {
   huge: Infinity
 };
 
+const DEFAULT_PLAYBACKRATES = [0.5, 1, 1.5, 2];
+
 /**
  * An instance of the `Player` class is created when any of the Video.js setup methods
  * are used to initialize a video.
@@ -1228,6 +1230,7 @@ class Player extends Component {
     this.on(this.tech_, 'durationchange', (e) => this.handleTechDurationChange_(e));
     this.on(this.tech_, 'fullscreenchange', (e, data) => this.handleTechFullscreenChange_(e, data));
     this.on(this.tech_, 'fullscreenerror', (e, err) => this.handleTechFullscreenError_(e, err));
+    this.on(this.tech_, 'download', (e, data) => this.handleTechDownload_(e, data));
     this.on(this.tech_, 'enterpictureinpicture', (e) => this.handleTechEnterPictureInPicture_(e));
     this.on(this.tech_, 'leavepictureinpicture', (e) => this.handleTechLeavePictureInPicture_(e));
     this.on(this.tech_, 'error', (e) => this.handleTechError_(e));
@@ -2091,6 +2094,10 @@ class Player extends Component {
     this.trigger('fullscreenerror', err);
   }
 
+  handleTechDownload_(event, data) {
+    this.trigger('download');
+  }
+
   /**
    * @private
    */
@@ -2198,7 +2205,7 @@ class Player extends Component {
       src: '',
       source: {},
       sources: [],
-      playbackRates: [],
+      playbackRates: DEFAULT_PLAYBACKRATES,
       volume: 1
     };
   }
@@ -2989,6 +2996,52 @@ class Player extends Component {
      * @type {Event}
      */
     this.trigger('exitFullWindow');
+  }
+
+  download(url) {
+    const fileName = url.substring(url.lastIndexOf('/') + 1, url.length);
+    const a = document.createElement('a');
+
+    a.style = 'display: none';
+    if (document.createEvent) {
+      const e = document.createEvent('MouseEvents');
+
+      e.initEvent('click', true, true);
+      a.dispatchEvent(e);
+    }
+
+    if (typeof fetch === 'function') {
+      fetch(url, {mode: 'cors'}).then(res => {
+        res.blob().then(blob => {
+          const blobUrl = window.URL.createObjectURL(blob);
+
+          a.download = fileName;
+          a.href = blobUrl;
+          a.click();
+          window.URL.revokeObjectURL(blobUrl);
+        }).catch(error => {
+          // eslint-disable-next-line no-console
+          console.error('download failed, error message is : ', error);
+        });
+      });
+    } else {
+      const xhr = new window.XMLHttpRequest();
+
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+      xhr.onload = function() {
+        if (this.status === 200) {
+          const blob = new window.Blob([this.response]);
+          const blobUrl = window.URL.createObjectURL(blob);
+
+          a.download = fileName;
+          a.href = blobUrl;
+
+          window.URL.revokeObjectURL(blobUrl);
+        }
+      };
+      xhr.send();
+    }
   }
 
   /**
@@ -5211,9 +5264,8 @@ Player.prototype.options_ = {
   inactivityTimeout: 2000,
 
   // default playback rates
-  playbackRates: [],
   // Add playback rate selection by adding rates
-  // 'playbackRates': [0.5, 1, 1.5, 2],
+  playbackRates: DEFAULT_PLAYBACKRATES,
   liveui: false,
 
   // Included control sets
